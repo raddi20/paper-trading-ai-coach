@@ -312,7 +312,17 @@ export async function runScan(options?: { ensureDemo?: boolean }): Promise<{
     }
   }
 
-  for (const item of WATCHLIST) {
+    const buyCandidates: Array<{
+      symbol: string;
+      assetClass: (typeof WATCHLIST)[number]["assetClass"];
+      price: number;
+      qty: number;
+      sma50: number;
+      rsi: number;
+      copy: { reason: string; coachNote: string };
+    }> = [];
+
+    for (const item of WATCHLIST) {
     if (getPosition(item.symbol)) continue;
     const series = barMap.get(item.symbol);
     if (!series?.bars.length) continue;
@@ -377,39 +387,64 @@ export async function runScan(options?: { ensureDemo?: boolean }): Promise<{
       take,
       pctOfPortfolio: (qty * price) / liveEquity,
     });
+    buyCandidates.push({
+      symbol: item.symbol,
+      assetClass: item.assetClass,
+      price,
+      qty,
+      sma50: indicators.sma50,
+      rsi: indicators.rsi,
+      copy,
+    });
+  }
 
+  // Prefer RSI near the middle of 40–65 so beginners are not flooded with every match.
+  buyCandidates.sort((a, b) => Math.abs(a.rsi - 52) - Math.abs(b.rsi - 52));
+  const ranked = buyCandidates.slice(0, settings.tradingMode === "auto" ? 2 : 3);
+  for (const extra of buyCandidates.slice(ranked.length)) {
+    skips += 1;
+    addJournal({
+      type: "skip",
+      symbol: extra.symbol,
+      title: `Ranked below the top setups: ${extra.symbol}`,
+      body: `${extra.symbol} also matched the buy rules (RSI ${extra.rsi.toFixed(1)}), but we only surface a few names at a time so the classroom stays readable.`,
+      meta: { code: "ranked_out", rsi: extra.rsi },
+    });
+  }
+
+  for (const candidate of ranked) {
     if (settings.tradingMode === "auto") {
       fillBuy({
-        symbol: item.symbol,
-        qty,
-        price,
-        reason: copy.reason,
-        coachNote: copy.coachNote,
+        symbol: candidate.symbol,
+        qty: candidate.qty,
+        price: candidate.price,
+        reason: candidate.copy.reason,
+        coachNote: candidate.copy.coachNote,
       });
       autoFills += 1;
       addJournal({
         type: "signal",
-        symbol: item.symbol,
-        title: `Auto paper BUY ${item.symbol}`,
-        body: copy.coachNote,
-        meta: { mode: "auto", price, qty },
+        symbol: candidate.symbol,
+        title: `Auto paper BUY ${candidate.symbol}`,
+        body: candidate.copy.coachNote,
+        meta: { mode: "auto", price: candidate.price, qty: candidate.qty },
       });
-    } else if (!hasPendingFor(item.symbol, "buy")) {
+    } else if (!hasPendingFor(candidate.symbol, "buy")) {
       insertSignal({
-        symbol: item.symbol,
+        symbol: candidate.symbol,
         action: "buy",
-        reason: copy.reason,
-        coachNote: copy.coachNote,
-        price,
-        qty,
+        reason: candidate.copy.reason,
+        coachNote: candidate.copy.coachNote,
+        price: candidate.price,
+        qty: candidate.qty,
       });
       created += 1;
       addJournal({
         type: "signal",
-        symbol: item.symbol,
-        title: `Buy signal: ${item.symbol}`,
-        body: copy.coachNote,
-        meta: { price, qty, sma50: indicators.sma50, rsi: indicators.rsi },
+        symbol: candidate.symbol,
+        title: `Buy signal: ${candidate.symbol}`,
+        body: candidate.copy.coachNote,
+        meta: { price: candidate.price, qty: candidate.qty, sma50: candidate.sma50, rsi: candidate.rsi },
       });
     }
   }
