@@ -58,7 +58,7 @@ export function MarketsView() {
 
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         <aside className="rounded-2xl border border-border bg-card">
-          <ul className="max-h-[70vh] divide-y divide-border overflow-auto">
+          <ul className="max-h-56 divide-y divide-border overflow-auto lg:max-h-[70vh]">
             {quotes.map((item) => {
               const q = item.quote;
               const active = item.symbol === symbol;
