@@ -28,6 +28,7 @@ export function CoachChat() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const scroller = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -55,9 +56,7 @@ export function CoachChat() {
   }, []);
 
   useEffect(() => {
-    const el = scroller.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
+    endRef.current?.scrollIntoView({ block: "end" });
   }, [messages, sending]);
 
   const empty = messages.length === 0;
@@ -127,7 +126,7 @@ export function CoachChat() {
   }, [focusSymbol]);
 
   return (
-    <div className="flex min-h-[calc(100vh-11rem)] flex-col gap-4 md:min-h-[calc(100vh-8rem)]">
+    <div className="flex h-[calc(100dvh-13rem)] flex-col gap-4 md:h-[calc(100dvh-9.5rem)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-mint">Ask the Coach</p>
@@ -192,6 +191,7 @@ export function CoachChat() {
             messages.map((msg) => <Bubble key={msg.id} message={msg} />)
           )}
           {sending ? <Typing /> : null}
+          <div ref={endRef} className="h-1" />
         </div>
 
         {!empty ? (
