@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { AppState } from "@/lib/types";
 import { pct } from "@/lib/format";
 
@@ -33,6 +34,14 @@ export function CoachPanel({
         ) : null}
       </div>
       <p className="mt-3 text-sm leading-7 text-foreground/90">{state.coach.body}</p>
+      <div className="mt-4">
+        <Link
+          href="/coach"
+          className="inline-flex rounded-full bg-mint px-4 py-2 text-sm font-semibold text-background"
+        >
+          Ask the Coach
+        </Link>
+      </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-xs text-mute sm:grid-cols-4">
         <Stat label="Mode" value={state.settings.tradingMode === "auto" ? "Auto paper" : "Manual"} />
         <Stat

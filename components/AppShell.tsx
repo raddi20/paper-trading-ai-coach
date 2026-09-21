@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import { Onboarding } from "./Onboarding";
 
 const NAV = [
-  { href: "/", label: "Dashboard", hint: "Portfolio" },
-  { href: "/markets", label: "Markets", hint: "Charts" },
-  { href: "/journal", label: "Journal", hint: "History" },
-  { href: "/settings", label: "Settings", hint: "Risk" },
+  { href: "/", label: "Dashboard", short: "Dash", hint: "Home" },
+  { href: "/markets", label: "Markets", short: "Markets", hint: "Charts" },
+  { href: "/coach", label: "Coach", short: "Coach", hint: "Ask" },
+  { href: "/journal", label: "Journal", short: "Journal", hint: "Log" },
+  { href: "/settings", label: "Settings", short: "Settings", hint: "Risk" },
 ];
 
 export function AppShell({
@@ -33,7 +34,7 @@ export function AppShell({
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
             {NAV.map((item) => {
-              const active = pathname === item.href;
+              const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
@@ -55,9 +56,9 @@ export function AppShell({
         {children}
       </main>
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur md:hidden">
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {NAV.map((item) => {
-            const active = pathname === item.href;
+            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -66,7 +67,7 @@ export function AppShell({
                   active ? "text-mint" : "text-mute"
                 }`}
               >
-                <span className="font-medium">{item.label}</span>
+                <span className="font-medium">{item.short}</span>
                 <span className="text-[10px] opacity-70">{item.hint}</span>
               </Link>
             );

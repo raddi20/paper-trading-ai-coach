@@ -116,6 +116,79 @@ export type ClosedTrade = {
   createdAt: string;
 };
 
+export type CoachLead = {
+  label: string;
+  href: string;
+};
+
+export type CoachChatRole = "user" | "assistant";
+
+export type CoachChatMessage = {
+  id: number;
+  role: CoachChatRole;
+  content: string;
+  source: "template" | "llm" | null;
+  leads: CoachLead[];
+  focusSymbol: string | null;
+  createdAt: string;
+};
+
+export type CoachPositionSnapshot = {
+  symbol: string;
+  name: string;
+  assetClass: AssetClass;
+  qty: number;
+  avgPrice: number;
+  lastPrice: number | null;
+  stopPrice: number;
+  takeProfitPrice: number;
+  openedAt: string;
+  unrealizedPnl: number | null;
+  unrealizedPnlPct: number | null;
+};
+
+export type CoachFocusSnapshot = {
+  symbol: string;
+  name: string;
+  lastClose: number | null;
+  sma50: number | null;
+  rsi: number | null;
+  buySetup: boolean | null;
+  sellSetup: boolean | null;
+  notes: string[];
+  cached: boolean;
+};
+
+export type CoachContext = {
+  cash: number;
+  equity: number;
+  positionsValue: number;
+  startingCash: number;
+  dayPnl: number;
+  dayPnlPct: number;
+  allTimePnl: number;
+  tradingMode: TradingMode;
+  maxPositionPct: number;
+  maxDailyLossPct: number;
+  maxOpenPositions: number;
+  stopLossPct: number;
+  takeProfitPct: number;
+  dailyLossHalt: boolean;
+  lastScanAt: string | null;
+  positions: CoachPositionSnapshot[];
+  pendingSignals: PendingSignal[];
+  recentJournal: Array<{
+    type: JournalType;
+    symbol: string | null;
+    title: string;
+    body: string;
+    createdAt: string;
+  }>;
+  lastSkip: JournalEntry | null;
+  lastFill: JournalEntry | null;
+  focus: CoachFocusSnapshot | null;
+};
+
 export type AppState = {
   paper: true;
   disclaimer: string;

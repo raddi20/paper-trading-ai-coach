@@ -5,6 +5,9 @@ import { DEFAULT_SETTINGS, STARTING_CASH } from "./constants";
 import type {
   Account,
   ClosedTrade,
+  CoachChatMessage,
+  CoachChatRole,
+  CoachLead,
   EquitySnapshot,
   JournalEntry,
   JournalType,
@@ -109,6 +112,16 @@ function migrate(db: Database.Database) {
     CREATE TABLE IF NOT EXISTS kv (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS coach_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      source TEXT,
+      leads TEXT,
+      focus_symbol TEXT,
+      created_at TEXT NOT NULL
     );
   `);
 
@@ -516,6 +529,91 @@ export function setCachedBars(
     .run(symbol, payload, source, new Date().toISOString());
 }
 
+function parseLeads(raw: string | null): CoachLead[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (item): item is CoachLead =>
+        Boolean(
+          item &&
+            typeof item === "object" &&
+            typeof (item as CoachLead).label === "string" &&
+            typeof (item as CoachLead).href === "string",
+        ),
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function listCoachMessages(limit = 80): CoachChatMessage[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT id, role, content, source, leads, focus_symbol as focusSymbol, created_at as createdAt
+       FROM (
+         SELECT id, role, content, source, leads, focus_symbol, created_at
+         FROM coach_messages ORDER BY id DESC LIMIT ?
+       ) AS recent
+       ORDER BY id ASC`,
+    )
+    .all(limit) as Array<{
+    id: number;
+    role: CoachChatRole;
+    content: string;
+    source: "template" | "llm" | null;
+    leads: string | null;
+    focusSymbol: string | null;
+    createdAt: string;
+  }>;
+  return rows.map((row) => ({
+    id: row.id,
+    role: row.role,
+    content: row.content,
+    source: row.source,
+    leads: parseLeads(row.leads),
+    focusSymbol: row.focusSymbol,
+    createdAt: row.createdAt,
+  }));
+}
+
+export function addCoachMessage(entry: {
+  role: CoachChatRole;
+  content: string;
+  source?: "template" | "llm" | null;
+  leads?: CoachLead[];
+  focusSymbol?: string | null;
+}): CoachChatMessage {
+  const createdAt = new Date().toISOString();
+  const result = getDb()
+    .prepare(
+      `INSERT INTO coach_messages (role, content, source, leads, focus_symbol, created_at)
+       VALUES (@role, @content, @source, @leads, @focusSymbol, @createdAt)`,
+    )
+    .run({
+      role: entry.role,
+      content: entry.content,
+      source: entry.source ?? null,
+      leads: entry.leads?.length ? JSON.stringify(entry.leads) : null,
+      focusSymbol: entry.focusSymbol ?? null,
+      createdAt,
+    });
+  return {
+    id: Number(result.lastInsertRowid),
+    role: entry.role,
+    content: entry.content,
+    source: entry.source ?? null,
+    leads: entry.leads ?? [],
+    focusSymbol: entry.focusSymbol ?? null,
+    createdAt,
+  };
+}
+
+export function clearCoachMessages() {
+  getDb().prepare("DELETE FROM coach_messages").run();
+}
+
 export function resetPaperAccount() {
   const db = getDb();
   const now = new Date().toISOString();
@@ -526,6 +624,7 @@ export function resetPaperAccount() {
       DELETE FROM journal;
       DELETE FROM trades;
       DELETE FROM equity_snapshots;
+      DELETE FROM coach_messages;
     `);
     db.prepare("UPDATE account SET cash = ?, starting_cash = ?, created_at = ? WHERE id = 1").run(
       STARTING_CASH,

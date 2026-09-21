@@ -28,6 +28,19 @@ export const RSI_BUY_MAX = 65;
 export const BARS_CACHE_MS = 30 * 60 * 1000;
 export const QUOTE_CACHE_MS = 60 * 1000;
 export const LLM_TIMEOUT_MS = 2500;
+/** Chat can wait a bit longer than dashboard copy; always falls back. */
+export const CHAT_LLM_TIMEOUT_MS = 12_000;
+export const CHAT_MAX_MESSAGE_CHARS = 2_000;
+export const CHAT_HISTORY_LIMIT = 80;
+
+export const COACH_STARTER_PROMPTS = [
+  "What's in my portfolio?",
+  "Why am I holding this?",
+  "What does RSI mean on this chart?",
+  "Should I confirm this signal?",
+  "Explain my last journal skip.",
+  "What is a stop-loss?",
+];
 
 export const WATCHLIST: WatchItem[] = [
   { symbol: "AAPL", name: "Apple", assetClass: "equity", yahoo: "AAPL" },
