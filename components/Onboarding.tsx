@@ -13,7 +13,7 @@ const STEPS = [
   },
   {
     title: "You stay in control (Manual is the default)",
-    body: "The coach can suggest a paper trade. In Manual mode it waits for you. Auto paper can place simulated fills by itself — still not real money. Risk brakes cap each position, how many you hold, and how much you can lose in a day.",
+    body: "The coach can suggest a paper trade. In Manual mode it waits for you. Auto paper can place simulated fills by itself — still not real money. Risk brakes cap each position, how many you hold, and how much you can lose in a day. Ask the Coach from the nav any time a word, a chart, or a position does not make sense.",
   },
   {
     title: "Past charts ≠ future results",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { FILL_MODEL_DOC } from "@/lib/constants";
 import { StrategyRules } from "./StrategyRules";
 import { postJson, useAppState } from "./useAppState";
@@ -50,7 +51,8 @@ export function SettingsView() {
         <h1 className="text-2xl font-semibold tracking-tight">Settings & risk</h1>
         <p className="mt-1 max-w-2xl text-sm leading-6 text-mute">
           Hard-coded classroom defaults you can edit. None of this talks to a broker. There is
-          nowhere to paste API keys for live trading — by design.
+          nowhere to paste API keys for live trading — by design. Conversational coaching lives
+          on the Coach tab; optional OpenAI wording is described below.
         </p>
       </div>
       {message ? <p className="text-sm text-blue">{message}</p> : null}
@@ -146,11 +148,24 @@ export function SettingsView() {
       <StrategyRules />
 
       <section className="rounded-2xl border border-border bg-card p-5 text-sm leading-6 text-mute">
-        <h2 className="font-semibold text-foreground">Optional LLM explanations</h2>
+        <h2 className="font-semibold text-foreground">Ask the Coach & optional LLM</h2>
         <p className="mt-2">
-          If you set <code className="text-mint">OPENAI_API_KEY</code> in <code>.env.local</code>,
-          the coach may rewrite its 2–3 sentence notes. The app never waits more than ~2.5s and
-          always falls back to templates. Trade decisions stay 100% rule-based either way.
+          Open{" "}
+          <Link href="/coach" className="text-mint underline">
+            Ask the Coach
+          </Link>{" "}
+          in the nav to type questions. Without a
+          key, answers still use your paper cash, positions, journal, and the published strategy
+          rules. They never invent fills you do not have.
+        </p>
+        <p className="mt-2">
+          For richer conversational wording, copy <code className="text-mint">.env.example</code> to{" "}
+          <code className="text-mint">.env.local</code> and set{" "}
+          <code className="text-mint">OPENAI_API_KEY</code>. Optional{" "}
+          <code className="text-mint">OPENAI_MODEL</code> defaults to <code>gpt-4o-mini</code>. Restart{" "}
+          <code>npm run dev</code> after changing env. Chat times out after ~12s and falls back to
+          templates. Dashboard blurbs still time out after ~2.5s. Trade decisions stay 100%
+          rule-based.
         </p>
         <p className="mt-2">
           Later, if you want a paid market-data key (Polygon, Alpha Vantage, etc.), add it only

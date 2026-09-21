@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { compactTime } from "@/lib/format";
 import { WATCHLIST } from "@/lib/constants";
@@ -45,7 +46,11 @@ export function JournalView() {
         <h1 className="text-2xl font-semibold tracking-tight">Trade journal</h1>
         <p className="mt-1 max-w-2xl text-sm leading-6 text-mute">
           Every signal, simulated fill, skip reason, and coach note lands here. Filter by type or
-          ticker. This is the paper audit trail — still not a real brokerage blotter.
+          ticker. This is the paper audit trail — still not a real brokerage blotter.{" "}
+          <Link href="/coach" className="text-mint underline">
+            Ask the Coach
+          </Link>{" "}
+          to explain a skip or fill in plain English.
         </p>
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PriceChart } from "./PriceChart";
 import { StrategyRules } from "./StrategyRules";
@@ -109,10 +110,16 @@ export function MarketsView() {
                     {chart.quote ? ` · last ${usd(chart.quote.price)}` : ""}
                   </p>
                 </div>
-                <div className="flex gap-3 text-sm">
+                <div className="flex flex-wrap items-center gap-3 text-sm">
                   <Pill label="SMA 20" value={chart.indicators.sma20} />
                   <Pill label="SMA 50" value={chart.indicators.sma50} />
                   <Pill label="RSI 14" value={chart.indicators.rsi} digits={1} />
+                  <Link
+                    href={`/coach?symbol=${chart.symbol}`}
+                    className="rounded-full border border-mint/40 px-3 py-1 text-xs font-medium text-mint"
+                  >
+                    Ask the Coach
+                  </Link>
                 </div>
               </div>
               <PriceChart
